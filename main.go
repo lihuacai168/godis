@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "godis/cmd"
+import "github.com/lihuacai168/godis/cmd"
 
 func main() {
 	cmd.Execute()
