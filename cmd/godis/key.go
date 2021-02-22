@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package main
 
 import (
 	"fmt"
@@ -21,9 +21,9 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// setCmd represents the set command
-var setCmd = &cobra.Command{
-	Use:   "set",
+// keyCmd represents the key command
+var keyCmd = &cobra.Command{
+	Use:   "key",
 	Short: "A brief description of your command",
 	Long: `A longer description that spans multiple lines and likely contains examples
 and usage of using your command. For example:
@@ -32,20 +32,20 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("set called")
+		fmt.Println("key called")
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(keyCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// setCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// keyCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// keyCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

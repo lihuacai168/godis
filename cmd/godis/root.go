@@ -13,12 +13,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package main
 
 import (
 	"fmt"
-	"os"
+	"github.com/lihuacai168/godis/cmd/config"
 	"github.com/spf13/cobra"
+	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -46,15 +47,26 @@ to quickly create a Cobra application.`,
 func Execute() {
 	cobra.CheckErr(rootCmd.Execute())
 }
+func main() {
+	Execute()
+}
+
+var cfg config.Config
+
+var currentCluster *config.Cluster
+
+var (
+	password        string
+	addrs           []string
+	clusterOverride string
+)
 
 func init() {
-	cobra.OnInitialize(initConfig)
+	cobra.OnInitialize(onInit)
 
 	// Here you will define your flags and configuration settings.
 	// Cobra supports persistent flags, which, if defined here,
 	// will be global for your application.
-
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.godis.yaml)")
 
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
@@ -82,4 +94,25 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err == nil {
 		fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
 	}
+}
+func onInit() {
+	var err error
+	cfg, err = config.ReadConfig(cfgFile)
+	if err != nil {
+		errorExit("Invalid config: %v", err)
+	}
+
+	cfg.ClusterOverride = clusterOverride
+
+	cluster := cfg.ActiveCluster()
+	if cluster != nil {
+		// Use active cluster from config
+		currentCluster = cluster
+	} else {
+		// Create sane default if not configured
+		currentCluster = &config.Cluster{
+			Addrs: []string{"localhost:6379"},
+		}
+	}
+
 }
