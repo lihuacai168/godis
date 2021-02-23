@@ -19,19 +19,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/lihuacai168/godis/cmd/config"
-	"github.com/mattn/go-colorable"
-	"io"
 	"os"
 
 	"github.com/spf13/cobra"
-)
-
-var (
-	outWriter io.Writer = os.Stdout
-	errWriter io.Writer = os.Stderr
-	inReader  io.Reader = os.Stdin
-
-	colorableOut io.Writer = colorable.NewColorableStdout()
 )
 
 // configCmd represents the config command

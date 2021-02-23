@@ -16,13 +16,27 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"github.com/go-redis/redis/v8"
 	"github.com/lihuacai168/godis/cmd/config"
+	"github.com/mattn/go-colorable"
 	"github.com/spf13/cobra"
+	"io"
+	"log"
 	"os"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+)
+
+var (
+	raw       bool
+	outWriter io.Writer = os.Stdout
+	errWriter io.Writer = os.Stderr
+	inReader  io.Reader = os.Stdin
+
+	colorableOut io.Writer = colorable.NewColorableStdout()
 )
 
 var cfgFile string
@@ -31,15 +45,16 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "godis",
 	Short: "A brief description of your application",
-	Long: `A longer description that spans multiple lines and likely contains
-examples and usage of using your application. For example:
 
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	// Uncomment the following line if your bare application
-	// has an action associated with it:
-	// Run: func(cmd *cobra.Command, args []string) { },
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		outWriter = cmd.OutOrStdout()
+		errWriter = cmd.ErrOrStderr()
+		inReader = cmd.InOrStdin()
+
+		if outWriter != os.Stdout {
+			colorableOut = outWriter
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -51,7 +66,8 @@ func Execute() {
 var cfg config.Config
 
 var currentCluster *config.Cluster
-
+var rdb *redis.ClusterClient
+var ctx = context.Background()
 var (
 	password        string
 	addrs           []string
@@ -68,6 +84,7 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	rootCmd.PersistentFlags().BoolVar(&raw, "raw", false, "show raw result")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -111,5 +128,14 @@ func onInit() {
 			Addrs: []string{"localhost:6379"},
 		}
 	}
-
+	initClient()
+}
+func initClient() {
+	a := currentCluster.Addrs
+	p := currentCluster.Password
+	rdb = redis.NewClusterClient(&redis.ClusterOptions{
+		Addrs:    a,
+		Password: p,
+	})
+	log.Printf("use %s conf, addr is %s connected success\n", currentCluster.Name, a)
 }

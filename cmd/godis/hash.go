@@ -16,36 +16,75 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
-
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/spf13/cobra"
 )
 
 // hashCmd represents the hash command
 var hashCmd = &cobra.Command{
 	Use:   "hash",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("hash called")
-	},
+	Short: "hash key operation",
 }
+
+var (
+	keyfmt *prettyjson.Formatter
+)
 
 func init() {
 	rootCmd.AddCommand(hashCmd)
+	hashCmd.AddCommand(hGetAllCmd)
+	hashCmd.AddCommand(hGetCmd)
 
-	// Here you will define your flags and configuration settings.
+	keyfmt = prettyjson.NewFormatter()
+	keyfmt.Newline = " " // Replace newline with space to avoid condensed output.
+	keyfmt.Indent = 0
+}
 
-	// Cobra supports Persistent Flags which will work for this command
-	// and all subcommands, e.g.:
-	// hashCmd.PersistentFlags().String("foo", "", "A help for foo")
+var hGetAllCmd = &cobra.Command{
+	Use:     "hgetall [key]",
+	Aliases: []string{"hga"},
+	Short:   "hash key hgetall",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		result := hGetAll(args[0])
+		_, _ = colorableOut.Write(map2Json(result))
+		fmt.Fprintln(outWriter)
+	},
+}
+var hGetCmd = &cobra.Command{
+	Use:     "hget [key] [field]",
+	Aliases: []string{"hg"},
+	Short:   "hash key hget",
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		result := hGet(args[0], args[1])
+		b := []byte(result)
+		_, _ = colorableOut.Write(str2Json(b))
+		fmt.Fprintln(outWriter)
+	},
+}
 
-	// Cobra supports local flags which will only run when this command
-	// is called directly, e.g.:
-	// hashCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+func hGetAll(key string) map[string]string {
+	r, _ := rdb.HGetAll(ctx, key).Result()
+	return r
+}
+
+func hGet(key, field string) string {
+	result, _ := rdb.HGet(ctx, key, field).Result()
+	return result
+}
+
+func map2Json(key map[string]string) []byte {
+	jsonStr, _ := json.Marshal(key)
+	b, _ := prettyjson.Format(jsonStr)
+	return b
+}
+
+func str2Json(key []byte) []byte {
+	if b, err := prettyjson.Format(key); err == nil {
+		return b
+	}
+	return key
 }
