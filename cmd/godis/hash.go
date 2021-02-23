@@ -36,6 +36,7 @@ func init() {
 	rootCmd.AddCommand(hashCmd)
 	hashCmd.AddCommand(hGetAllCmd)
 	hashCmd.AddCommand(hGetCmd)
+	hashCmd.AddCommand(hashCopyCmd)
 
 	keyfmt = prettyjson.NewFormatter()
 	keyfmt.Newline = " " // Replace newline with space to avoid condensed output.
@@ -62,6 +63,23 @@ var hGetCmd = &cobra.Command{
 		result := hGet(args[0], args[1])
 		b := []byte(result)
 		_, _ = colorableOut.Write(str2Json(b))
+		fmt.Fprintln(outWriter)
+	},
+}
+
+var hashCopyCmd = &cobra.Command{
+	Use:     "copy [old_key] [new_key]",
+	Aliases: []string{"cp"},
+	Short:   "copy a hash key",
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		result := hGetAll(args[0])
+		for k, v := range result {
+			rdb.HSetNX(ctx, args[1], k, v)
+		}
+		newResult := hGetAll(args[1])
+		fmt.Println("hgetall " + args[1])
+		_, _ = colorableOut.Write(map2Json(newResult))
 		fmt.Fprintln(outWriter)
 	},
 }
