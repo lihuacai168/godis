@@ -24,20 +24,13 @@ import (
 // setCmd represents the set command
 var setCmd = &cobra.Command{
 	Use:   "set",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("set called")
-	},
+	Short: "set key operation",
 }
 
 func init() {
 	rootCmd.AddCommand(setCmd)
+	rootCmd.AddCommand(SMembersCmdShort)
+	setCmd.AddCommand(SMembersCmd)
 
 	// Here you will define your flags and configuration settings.
 
@@ -48,4 +41,22 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// setCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+var SMembersCmdShort = SMembersCmd
+var SMembersCmd = &cobra.Command{
+	Use:     "smembers [key]",
+	Aliases: []string{"sget"},
+	Short:   "set key smembers",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		result := SMembers(args[0])
+		_, _ = colorableOut.Write(slice2Json(result))
+		fmt.Fprintln(outWriter)
+	},
+}
+
+func SMembers(key string) []string {
+	result, _ := rdb.SMembers(ctx, key).Result()
+	return result
 }

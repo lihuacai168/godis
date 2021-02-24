@@ -159,6 +159,21 @@ func map2Json(key map[string]string) []byte {
 	return b
 }
 
+func sliceMap2Json(sliceMap []map[string]interface{}) []byte {
+	jsonStr, _ := json.Marshal(sliceMap)
+	b, _ := prettyjson.Format(jsonStr)
+	return b
+}
+
+func slice2Json(key []string) []byte {
+	var sliceMap []map[string]interface{}
+	for _, s := range key {
+		m, _ := JsonToMap(s)
+		sliceMap = append(sliceMap, m)
+	}
+	return sliceMap2Json(sliceMap)
+}
+
 func str2Json(key []byte) []byte {
 	if b, err := prettyjson.Format(key); err == nil {
 		return b
