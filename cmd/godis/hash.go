@@ -35,15 +35,26 @@ var (
 func init() {
 	rootCmd.AddCommand(hashCmd)
 	hashCmd.AddCommand(hGetAllCmd)
+	rootCmd.AddCommand(hGetAllCmdShort)
+
 	hashCmd.AddCommand(hGetCmd)
+	rootCmd.AddCommand(hGetCmdShort)
+
 	hashCmd.AddCommand(hashCopyCmd)
+	rootCmd.AddCommand(hashCopyCmdShort)
+
 	hashCmd.AddCommand(hmsetCmd)
+	rootCmd.AddCommand(hmsetCmdShort)
+
+	hashCmd.AddCommand(hashMvCmd)
+	rootCmd.AddCommand(hashMvCmdShort)
 
 	keyfmt = prettyjson.NewFormatter()
 	keyfmt.Newline = " " // Replace newline with space to avoid condensed output.
 	keyfmt.Indent = 0
 }
 
+var hGetAllCmdShort = hGetAllCmd
 var hGetAllCmd = &cobra.Command{
 	Use:     "hgetall [key]",
 	Aliases: []string{"hga"},
@@ -55,6 +66,7 @@ var hGetAllCmd = &cobra.Command{
 		fmt.Fprintln(outWriter)
 	},
 }
+var hGetCmdShort = hGetCmd
 var hGetCmd = &cobra.Command{
 	Use:     "hget [key] [field]",
 	Aliases: []string{"hg"},
@@ -68,9 +80,10 @@ var hGetCmd = &cobra.Command{
 	},
 }
 
+var hashCopyCmdShort = hashCopyCmd
 var hashCopyCmd = &cobra.Command{
-	Use:     "copy [old_key] [new_key]",
-	Aliases: []string{"cp"},
+	Use:     "hcopy [old_key] [new_key]",
+	Aliases: []string{"hcp"},
 	Short:   "copy a hash key",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -85,6 +98,25 @@ var hashCopyCmd = &cobra.Command{
 	},
 }
 
+var hashMvCmdShort = hashMvCmd
+var hashMvCmd = &cobra.Command{
+	Use:     "hrename [old_key] [new_key]",
+	Aliases: []string{"hmv"},
+	Short:   "rename a hash key",
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		result := hGetAll(args[0])
+		for k, v := range result {
+			rdb.HSet(ctx, args[1], k, v)
+		}
+		deleteCmd(args[0])
+		newResult := hGetAll(args[1])
+		fmt.Println("hgetall " + args[1])
+		_, _ = colorableOut.Write(map2Json(newResult))
+		fmt.Fprintln(outWriter)
+	},
+}
+var hmsetCmdShort = hmsetCmd
 var hmsetCmd = &cobra.Command{
 	Use:     "hmset [key] [jsonValue]",
 	Aliases: []string{"hms"},
@@ -104,6 +136,11 @@ var hmsetCmd = &cobra.Command{
 		_, _ = colorableOut.Write(map2Json(newResult))
 		fmt.Fprintln(outWriter)
 	},
+}
+
+func deleteCmd(key string) int64 {
+	r, _ := rdb.Del(ctx, key).Result()
+	return r
 }
 
 func hGetAll(key string) map[string]string {
