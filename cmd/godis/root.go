@@ -69,9 +69,10 @@ var currentCluster *config.Cluster
 var rdb *redis.ClusterClient
 var ctx = context.Background()
 var (
-	password        string
-	addrs           []string
-	clusterOverride string
+	password           string
+	clusterDescription string
+	addrs              []string
+	clusterOverride    string
 )
 
 func init() {

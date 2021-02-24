@@ -9,9 +9,10 @@ import (
 )
 
 type Cluster struct {
-	Name     string
-	Addrs    []string `yaml:"addrs"`
-	Password string   `yaml:"password"`
+	Name        string
+	Addrs       []string `yaml:"addrs"`
+	Password    string   `yaml:"password"`
+	Description string   `yaml:"desc"`
 }
 
 type Config struct {

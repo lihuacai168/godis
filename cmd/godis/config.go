@@ -40,6 +40,7 @@ func init() {
 	configCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.godis/config)")
 	configAddClusterCmd.Flags().StringSliceVarP(&addrs, "addrs", "a", nil, "Comma separated list of addrs ip:port pairs")
 	configAddClusterCmd.Flags().StringVarP(&password, "password", "p", "", "Redis password")
+	configAddClusterCmd.Flags().StringVar(&clusterDescription, "desc", "", "Cluster description")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -56,6 +57,7 @@ var configAddClusterCmd = &cobra.Command{
 	Aliases: []string{"add"},
 	Short:   "Add cluster",
 	Args:    cobra.ExactArgs(1),
+	Example: `godis config add-cluster qa_redis -a=192.168.22.64:7000 -p=redis_password --desc="redis for qa env"`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		for _, cluster := range cfg.Clusters {
@@ -64,9 +66,10 @@ var configAddClusterCmd = &cobra.Command{
 			}
 		}
 		cfg.Clusters = append(cfg.Clusters, &config.Cluster{
-			Name:     name,
-			Addrs:    addrs,
-			Password: password,
+			Name:        name,
+			Addrs:       addrs,
+			Description: clusterDescription,
+			Password:    password,
 		})
 		err := cfg.Write()
 		if err != nil {
