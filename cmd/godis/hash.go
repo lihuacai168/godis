@@ -153,8 +153,24 @@ func hGet(key, field string) string {
 	return result
 }
 
-func map2Json(key map[string]string) []byte {
-	jsonStr, _ := json.Marshal(key)
+func map2Json(m map[string]string) []byte {
+	tempMap := make(map[string]interface{})
+	for k, v := range m {
+		mapJson := map[string]interface{}{}
+		var sliceMapJson []map[string]interface{}
+		err := json.Unmarshal([]byte(v), &mapJson)
+		err1 := json.Unmarshal([]byte(v), &sliceMapJson)
+		if err == nil {
+			tempMap[k] = mapJson
+			continue
+		}
+		if err1 == nil {
+			tempMap[k] = sliceMapJson
+			continue
+		}
+		tempMap[k] = v
+	}
+	jsonStr, _ := json.Marshal(tempMap)
 	b, _ := prettyjson.Format(jsonStr)
 	return b
 }
