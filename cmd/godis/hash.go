@@ -37,6 +37,7 @@ func init() {
 	hashCmd.AddCommand(hGetAllCmd)
 	hashCmd.AddCommand(hGetCmd)
 	hashCmd.AddCommand(hashCopyCmd)
+	hashCmd.AddCommand(hmsetCmd)
 
 	keyfmt = prettyjson.NewFormatter()
 	keyfmt.Newline = " " // Replace newline with space to avoid condensed output.
@@ -75,10 +76,31 @@ var hashCopyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		result := hGetAll(args[0])
 		for k, v := range result {
-			rdb.HSetNX(ctx, args[1], k, v)
+			rdb.HSet(ctx, args[1], k, v)
 		}
 		newResult := hGetAll(args[1])
 		fmt.Println("hgetall " + args[1])
+		_, _ = colorableOut.Write(map2Json(newResult))
+		fmt.Fprintln(outWriter)
+	},
+}
+
+var hmsetCmd = &cobra.Command{
+	Use:     "hmset [key] [jsonValue]",
+	Aliases: []string{"hms"},
+	Short:   "add a hash key, auto unpack jsonValue",
+	Args:    cobra.ExactArgs(2),
+	Example: `godis hash hmset test_key '{"a":1, "b": "b"}'`,
+	Run: func(cmd *cobra.Command, args []string) {
+		mapValue, err := JsonToMap(args[1])
+		if err != nil {
+			errorExit("Unmarshal with error: %+v\n", err)
+		}
+		for k, v := range mapValue {
+			rdb.HSet(ctx, args[0], k, v)
+		}
+		newResult := hGetAll(args[0])
+		fmt.Println("hmset success, hash key is "+args[0], ", value is ")
 		_, _ = colorableOut.Write(map2Json(newResult))
 		fmt.Fprintln(outWriter)
 	},
@@ -105,4 +127,14 @@ func str2Json(key []byte) []byte {
 		return b
 	}
 	return key
+}
+
+// Convert json string to map
+func JsonToMap(jsonStr string) (map[string]interface{}, error) {
+	m := make(map[string]interface{})
+	err := json.Unmarshal([]byte(jsonStr), &m)
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
 }
