@@ -121,23 +121,25 @@ func onInit() {
 	if cluster != nil {
 		// Use active cluster from config
 		currentCluster = cluster
-	} else {
-		// Create sane default if not configured
-		errorExit(`not configured,please use "godis config add" to set a cluster configuration`)
 	}
-
 	initClient()
 }
 func initClient() {
-	a := currentCluster.Addrs
-	p := currentCluster.Password
-	rdb = redis.NewClusterClient(&redis.ClusterOptions{
-		Addrs:    a,
-		Password: p,
-	})
-	_, err := rdb.Ping(ctx).Result()
-	if err != nil {
-		errorExit("use %s conf, addr: %s, password: %s\nPing server: %v", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
+	if currentCluster == nil {
+		log.Printf(`not configured,please use "godis config add" to set a cluster configuration`)
+	} else {
+		a := currentCluster.Addrs
+		p := currentCluster.Password
+		rdb = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:    a,
+			Password: p,
+		})
+		_, err := rdb.Ping(ctx).Result()
+		if err != nil {
+			log.Printf("use %s conf, addr: %s, password: %s\nPing server: %v", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
+		} else {
+			log.Printf("use %s conf, addr is %s connected success\n", currentCluster.Name, a)
+		}
 	}
-	log.Printf("use %s conf, addr is %s connected success\n", currentCluster.Name, a)
+
 }
