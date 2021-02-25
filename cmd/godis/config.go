@@ -18,6 +18,7 @@ package cmd
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/hokaccha/go-prettyjson"
 	"github.com/lihuacai168/godis/cmd/config"
 	"os"
 
@@ -28,7 +29,7 @@ import (
 var configCmd = &cobra.Command{
 	Use:     "config",
 	Aliases: []string{"conf"},
-	Short:   "Handle kaf configuration",
+	Short:   "Handle godis configuration",
 }
 
 func init() {
@@ -129,11 +130,10 @@ var configLsCmd = &cobra.Command{
 	Short:   "Display clusters in the configuration file",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		for _, cluster := range cfg.Clusters {
-			marshal, _ := json.Marshal(cluster)
-			os.Stdout.Write(marshal)
-			fmt.Println()
-		}
+		jsonStr, _ := json.Marshal(cfg.Clusters)
+		b, _ := prettyjson.Format(jsonStr)
+		_, _ = colorableOut.Write(b)
+		fmt.Fprintln(outWriter)
 		fmt.Println("CurrentCluster: " + cfg.CurrentCluster)
 	},
 }

@@ -31,7 +31,6 @@ import (
 )
 
 var (
-	raw       bool
 	outWriter io.Writer = os.Stdout
 	errWriter io.Writer = os.Stderr
 	inReader  io.Reader = os.Stdin
@@ -85,7 +84,6 @@ func init() {
 	// Cobra also supports local flags, which will only run
 	// when this action is called directly.
 	rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
-	rootCmd.PersistentFlags().BoolVar(&raw, "raw", false, "show raw result")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -125,10 +123,9 @@ func onInit() {
 		currentCluster = cluster
 	} else {
 		// Create sane default if not configured
-		currentCluster = &config.Cluster{
-			Addrs: []string{"localhost:6379"},
-		}
+		errorExit(`not configured,please use "godis config add" to set a cluster configuration`)
 	}
+
 	initClient()
 }
 func initClient() {
@@ -138,5 +135,9 @@ func initClient() {
 		Addrs:    a,
 		Password: p,
 	})
+	_, err := rdb.Ping(ctx).Result()
+	if err != nil {
+		errorExit("use %s conf, addr: %s, password: %s\nPing server: %v", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
+	}
 	log.Printf("use %s conf, addr is %s connected success\n", currentCluster.Name, a)
 }
