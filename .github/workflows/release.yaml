@@ -10,7 +10,7 @@ jobs:
     name: release linux/386
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -22,7 +22,7 @@ jobs:
     name: release linux/amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -34,7 +34,7 @@ jobs:
     name: release linux/386
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -46,7 +46,7 @@ jobs:
     name: release linux/amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -58,7 +58,7 @@ jobs:
     name: release darwin/amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -70,7 +70,7 @@ jobs:
     name: release windows/386
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
@@ -82,7 +82,7 @@ jobs:
     name: release windows/amd64
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@master
+      - uses: release/checkout@master
       - name: compile and release
         uses: lihuacai168/godis@v0.1.2
         env:
