@@ -36,8 +36,74 @@ to quickly create a Cobra application.`,
 	},
 }
 
+var deleteCmd = &cobra.Command{
+	Use:     "del [key]",
+	Aliases: []string{"rm", "delete"},
+	Short:   "delete a key",
+	Args:    cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if !isExists(args[0]) {
+			fmt.Println("key not exists")
+		} else {
+			result := delete(args[0])
+			var outMsg string
+			if result == 1 {
+				outMsg = "delete key success"
+			} else {
+				outMsg = "delete key fail"
+			}
+			_, _ = colorableOut.Write([]byte(outMsg))
+			fmt.Fprintln(outWriter)
+		}
+	},
+}
+
+var existsCmd = &cobra.Command{
+	Use:   "exists [key]",
+	Short: "assure a key is exists",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		if isExists(args[0]) {
+			fmt.Println("key exists")
+		} else {
+			fmt.Println("key not exists")
+		}
+	},
+}
+var keysCmd = &cobra.Command{
+	Use:   "keys [pattern]",
+	Short: "search pattern keys",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		res := keys(args[0])
+		for _, patternKey := range res {
+			fmt.Println(patternKey)
+		}
+	},
+}
+
+func isExists(key string) bool {
+	result, _ := rdb.Exists(ctx, key).Result()
+	return resultInt2Bool(result)
+}
+
+func resultInt2Bool(resCode int64) bool {
+	if resCode == 1 {
+		return true
+	} else {
+		return false
+	}
+}
+func keys(pattern string) []string {
+	result, _ := rdb.Keys(ctx, pattern).Result()
+	return result
+}
 func init() {
 	rootCmd.AddCommand(keyCmd)
+	rootCmd.AddCommand(deleteCmd)
+	rootCmd.AddCommand(existsCmd)
+	// 返回结果不准确，暂时注释
+	//rootCmd.AddCommand(keysCmd)
 
 	// Here you will define your flags and configuration settings.
 
