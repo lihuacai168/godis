@@ -49,6 +49,9 @@ func init() {
 	hashCmd.AddCommand(hashMvCmd)
 	rootCmd.AddCommand(hashMvCmdShort)
 
+	hashCmd.AddCommand(hDelCmd)
+	rootCmd.AddCommand(hDelCmdShort)
+
 	keyfmt = prettyjson.NewFormatter()
 	keyfmt.Newline = " " // Replace newline with space to avoid condensed output.
 	keyfmt.Indent = 0
@@ -79,7 +82,21 @@ var hGetCmd = &cobra.Command{
 		fmt.Fprintln(outWriter)
 	},
 }
+var hDelCmdShort = hDelCmd
+var hDelCmd = &cobra.Command{
+	Use:     "hdel [key] [field]",
+	Aliases: []string{"hd"},
+	Short:   "hash key hget",
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		if !isExists(args[0]) {
+			fmt.Println("hash key not exists")
+		} else {
+			fmt.Println(hDel(args[0], args[1]))
+		}
 
+	},
+}
 var hashCopyCmdShort = hashCopyCmd
 var hashCopyCmd = &cobra.Command{
 	Use:     "hcopy [old_key] [new_key]",
@@ -109,7 +126,7 @@ var hashMvCmd = &cobra.Command{
 		for k, v := range result {
 			rdb.HSet(ctx, args[1], k, v)
 		}
-		deleteCmd(args[0])
+		delete(args[0])
 		newResult := hGetAll(args[1])
 		fmt.Println("hgetall " + args[1])
 		_, _ = colorableOut.Write(map2Json(newResult))
@@ -138,7 +155,7 @@ var hmsetCmd = &cobra.Command{
 	},
 }
 
-func deleteCmd(key string) int64 {
+func delete(key string) int64 {
 	r, _ := rdb.Del(ctx, key).Result()
 	return r
 }
@@ -153,6 +170,10 @@ func hGet(key, field string) string {
 	return result
 }
 
+func hDel(key, field string) int64 {
+	result, _ := rdb.HDel(ctx, key, field).Result()
+	return result
+}
 func map2Json(m map[string]string) []byte {
 	tempMap := make(map[string]interface{})
 	for k, v := range m {
