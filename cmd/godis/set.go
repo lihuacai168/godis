@@ -16,7 +16,9 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/hokaccha/go-prettyjson"
 
 	"github.com/spf13/cobra"
 )
@@ -32,6 +34,8 @@ func init() {
 	rootCmd.AddCommand(SMembersCmdShort)
 	setCmd.AddCommand(SMembersCmd)
 
+	rootCmd.AddCommand(SAddCmdShort)
+	setCmd.AddCommand(SAddCmd)
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
@@ -51,12 +55,48 @@ var SMembersCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		result := SMembers(args[0])
-		_, _ = colorableOut.Write(slice2Json(result))
+		_, _ = colorableOut.Write(result)
 		fmt.Fprintln(outWriter)
 	},
 }
 
-func SMembers(key string) []string {
+func SMembers(key string) []byte {
 	result, _ := rdb.SMembers(ctx, key).Result()
-	return result
+	sl := make([]interface{}, len(result))
+	for i, s := range result {
+		m, err := JsonToMap(s)
+		if err != nil {
+			sl[i] = s
+		} else {
+			sl[i] = m
+		}
+	}
+	b, _ := json.Marshal(sl)
+	p, _ := prettyjson.Format(b)
+	return p
+}
+
+var SAddCmdShort = SAddCmd
+var SAddCmd = &cobra.Command{
+	Use:   "sadd [key] member1 member2 member3...",
+	Short: "set key add",
+	Args:  cobra.RangeArgs(2, int(^uint(0)>>1)),
+	Run: func(cmd *cobra.Command, args []string) {
+		members := make([]interface{}, len(args))
+		for index, arg := range args {
+			if index == 0 {
+				continue
+			}
+			members[index] = arg
+		}
+		SAdd(args[0], members)
+		result := SMembers(args[0])
+		fmt.Println("sadd success, set key is "+args[0], ", value is ")
+		_, _ = colorableOut.Write(result)
+		fmt.Fprintln(outWriter)
+	},
+}
+
+func SAdd(key string, members []interface{}) {
+	rdb.SAdd(ctx, key, members...)
 }
