@@ -21,21 +21,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// keyCmd represents the key command
-var keyCmd = &cobra.Command{
-	Use:   "key",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("key called")
-	},
-}
-
 var deleteCmd = &cobra.Command{
 	Use:     "del [key]",
 	Aliases: []string{"rm", "delete"},
@@ -82,6 +67,35 @@ var keysCmd = &cobra.Command{
 	},
 }
 
+var typeCmd = &cobra.Command{
+	Use:   "type [key]",
+	Short: "get key type",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		res := typeKey(args[0])
+		fmt.Printf("%s type is: %s\n", args[0], res)
+	},
+}
+var renamenxCmd = &cobra.Command{
+	Use:     "renamenx [old_key] [new_key]",
+	Aliases: []string{"mv"},
+	Short:   "rename key, if new_key is exist return fail, else success",
+	Args:    cobra.ExactArgs(2),
+	Run: func(cmd *cobra.Command, args []string) {
+		//修改成功时，返回 1 。 如果 NEW_KEY_NAME 已经存在，返回 0 。
+		res, _ := rdb.RenameNX(ctx, args[0], args[1]).Result()
+		if res {
+			fmt.Println("rename success")
+		} else {
+			fmt.Println("rename fail")
+		}
+	},
+}
+
+func typeKey(key string) string {
+	result, _ := rdb.Type(ctx, key).Result()
+	return result
+}
 func isExists(key string) bool {
 	result, _ := rdb.Exists(ctx, key).Result()
 	return resultInt2Bool(result)
@@ -99,9 +113,11 @@ func keys(pattern string) []string {
 	return result
 }
 func init() {
-	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(deleteCmd)
 	rootCmd.AddCommand(existsCmd)
+	rootCmd.AddCommand(typeCmd)
+	rootCmd.AddCommand(renamenxCmd)
+
 	// 返回结果不准确，暂时注释
 	//rootCmd.AddCommand(keysCmd)
 

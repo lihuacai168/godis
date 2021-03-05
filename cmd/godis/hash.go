@@ -46,9 +46,6 @@ func init() {
 	hashCmd.AddCommand(hmsetCmd)
 	rootCmd.AddCommand(hmsetCmdShort)
 
-	hashCmd.AddCommand(hashMvCmd)
-	rootCmd.AddCommand(hashMvCmdShort)
-
 	hashCmd.AddCommand(hDelCmd)
 	rootCmd.AddCommand(hDelCmdShort)
 
@@ -115,24 +112,6 @@ var hashCopyCmd = &cobra.Command{
 	},
 }
 
-var hashMvCmdShort = hashMvCmd
-var hashMvCmd = &cobra.Command{
-	Use:     "hrename [old_key] [new_key]",
-	Aliases: []string{"hmv"},
-	Short:   "rename a hash key",
-	Args:    cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
-		result := hGetAll(args[0])
-		for k, v := range result {
-			rdb.HSet(ctx, args[1], k, v)
-		}
-		delete(args[0])
-		newResult := hGetAll(args[1])
-		fmt.Println("hgetall " + args[1])
-		_, _ = colorableOut.Write(map2Json(newResult))
-		fmt.Fprintln(outWriter)
-	},
-}
 var hmsetCmdShort = hmsetCmd
 var hmsetCmd = &cobra.Command{
 	Use:     "hmset [key] [jsonValue]",
