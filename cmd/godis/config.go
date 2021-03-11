@@ -42,6 +42,7 @@ func init() {
 	configAddClusterCmd.Flags().StringSliceVarP(&addrs, "addrs", "a", nil, "Comma separated list of addrs ip:port pairs")
 	configAddClusterCmd.Flags().StringVarP(&password, "password", "p", "", "Redis password")
 	configAddClusterCmd.Flags().StringVar(&clusterDescription, "desc", "", "Cluster description")
+	configAddClusterCmd.Flags().BoolVar(&isSafeMode, "isSafeMode", false, "if true, Only can execute safe(readonly) cmd")
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command

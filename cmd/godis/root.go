@@ -25,6 +25,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
@@ -50,11 +51,27 @@ var rootCmd = &cobra.Command{
 		outWriter = cmd.OutOrStdout()
 		errWriter = cmd.ErrOrStderr()
 		inReader = cmd.InOrStdin()
-
 		if outWriter != os.Stdout {
 			colorableOut = outWriter
 		}
+		parentCmd := cmd.Parent().Use
+		if parentCmd != "config" {
+			nameAndAliases := strings.Split(cmd.NameAndAliases(), ",")
+			safeCmd := []string{"hg", "hget", "hgetall", "hga", "sget", "smembers", "type", "config"}
+			if !contains(safeCmd, nameAndAliases[0]) {
+				panic(fmt.Sprintf("safe mode can only support cmds: %v", safeCmd))
+			}
+		}
 	},
+}
+
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -74,6 +91,7 @@ var (
 	clusterDescription string
 	addrs              []string
 	clusterOverride    string
+	isSafeMode         bool
 )
 
 func init() {
@@ -129,7 +147,11 @@ func onInit() {
 }
 func initClient() {
 	if currentCluster == nil {
-		log.Printf(`not configured,please use "godis config add" to set a cluster configuration`)
+		if cfg.ClusterOverride != "" {
+			panic(fmt.Sprintf("%s not in configuration", cfg.ClusterOverride))
+		} else {
+			panic(`not configured, please use "godis config add" to set a cluster configuration`)
+		}
 	} else {
 		a := currentCluster.Addrs
 		p := currentCluster.Password
@@ -140,7 +162,6 @@ func initClient() {
 		clusterSuccess, err := clusterClient.Ping(ctx).Result()
 		aloneClient = redis.NewClient(&redis.Options{Addr: a[0], Password: p})
 		aloneSuccess, _ := aloneClient.Ping(ctx).Result()
-
 		if clusterSuccess == ConnectSuccess {
 			workedClient = "cluster"
 		} else if aloneSuccess == ConnectSuccess {
@@ -150,7 +171,7 @@ func initClient() {
 		if workedClient == "" {
 			log.Printf("cluster and alone mode connect failed, use %s conf, addr: %s, password: %s\nPing server: %v\n", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
 		} else {
-			log.Printf("%s mode connected success, use %s conf, addr is %s \n", workedClient, currentCluster.Name, a)
+			log.Printf("connect success, using %s mode, conf: %s, addr is %s \n", workedClient, currentCluster.Name, a)
 		}
 	}
 

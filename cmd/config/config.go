@@ -13,6 +13,7 @@ type Cluster struct {
 	Addrs       []string `yaml:"addrs"`
 	Password    string   `yaml:"password"`
 	Description string   `yaml:"desc"`
+	IsSafeMode  bool     `yaml:"isSafeMode" default:"false"`
 }
 
 type Config struct {
