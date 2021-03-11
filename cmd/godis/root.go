@@ -35,7 +35,8 @@ var (
 	errWriter io.Writer = os.Stderr
 	inReader  io.Reader = os.Stdin
 
-	colorableOut io.Writer = colorable.NewColorableStdout()
+	colorableOut   io.Writer = colorable.NewColorableStdout()
+	ConnectSuccess           = "PONG"
 )
 
 var cfgFile string
@@ -63,9 +64,10 @@ func Execute() {
 }
 
 var cfg config.Config
-
+var workedClient string
 var currentCluster *config.Cluster
-var rdb *redis.ClusterClient
+var clusterClient *redis.ClusterClient
+var aloneClient *redis.Client
 var ctx = context.Background()
 var (
 	password           string
@@ -131,15 +133,24 @@ func initClient() {
 	} else {
 		a := currentCluster.Addrs
 		p := currentCluster.Password
-		rdb = redis.NewClusterClient(&redis.ClusterOptions{
+		clusterClient = redis.NewClusterClient(&redis.ClusterOptions{
 			Addrs:    a,
 			Password: p,
 		})
-		_, err := rdb.Ping(ctx).Result()
-		if err != nil {
-			log.Printf("use %s conf, addr: %s, password: %s\nPing server: %v", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
+		clusterSuccess, err := clusterClient.Ping(ctx).Result()
+		aloneClient = redis.NewClient(&redis.Options{Addr: a[0], Password: p})
+		aloneSuccess, _ := aloneClient.Ping(ctx).Result()
+
+		if clusterSuccess == ConnectSuccess {
+			workedClient = "cluster"
+		} else if aloneSuccess == ConnectSuccess {
+			workedClient = "alone"
+		}
+
+		if workedClient == "" {
+			log.Printf("cluster and alone mode connect failed, use %s conf, addr: %s, password: %s\nPing server: %v\n", currentCluster.Name, currentCluster.Addrs, currentCluster.Password, err)
 		} else {
-			log.Printf("use %s conf, addr is %s connected success\n", currentCluster.Name, a)
+			log.Printf("%s mode connected success, use %s conf, addr is %s \n", workedClient, currentCluster.Name, a)
 		}
 	}
 

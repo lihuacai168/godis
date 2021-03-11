@@ -103,7 +103,11 @@ var hashCopyCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		result := hGetAll(args[0])
 		for k, v := range result {
-			rdb.HSet(ctx, args[1], k, v)
+			if workedClient == "cluster" {
+				clusterClient.HSet(ctx, args[1], k, v)
+			} else if workedClient == "alone" {
+				aloneClient.HSet(ctx, args[1], k, v)
+			}
 		}
 		newResult := hGetAll(args[1])
 		fmt.Println("hgetall " + args[1])
@@ -125,7 +129,11 @@ var hmsetCmd = &cobra.Command{
 			errorExit("Unmarshal with error: %+v\n", err)
 		}
 		for k, v := range mapValue {
-			rdb.HSet(ctx, args[0], k, v)
+			if workedClient == "cluster" {
+				clusterClient.HSet(ctx, args[0], k, v)
+			} else if workedClient == "alone" {
+				aloneClient.HSet(ctx, args[0], k, v)
+			}
 		}
 		newResult := hGetAll(args[0])
 		fmt.Println("hmset success, hash key is "+args[0], ", value is ")
@@ -135,23 +143,43 @@ var hmsetCmd = &cobra.Command{
 }
 
 func delete(key string) int64 {
-	r, _ := rdb.Del(ctx, key).Result()
+	var r int64
+	if workedClient == "cluster" {
+		r, _ = clusterClient.Del(ctx, key).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.Del(ctx, key).Result()
+	}
 	return r
 }
 
 func hGetAll(key string) map[string]string {
-	r, _ := rdb.HGetAll(ctx, key).Result()
+	var r map[string]string
+	if workedClient == "cluster" {
+		r, _ = clusterClient.HGetAll(ctx, key).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.HGetAll(ctx, key).Result()
+	}
 	return r
 }
 
 func hGet(key, field string) string {
-	result, _ := rdb.HGet(ctx, key, field).Result()
-	return result
+	var r string
+	if workedClient == "cluster" {
+		r, _ = clusterClient.HGet(ctx, key, field).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.HGet(ctx, key, field).Result()
+	}
+	return r
 }
 
 func hDel(key, field string) int64 {
-	result, _ := rdb.HDel(ctx, key, field).Result()
-	return result
+	var r int64
+	if workedClient == "cluster" {
+		r, _ = clusterClient.HDel(ctx, key, field).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.HDel(ctx, key, field).Result()
+	}
+	return r
 }
 func map2Json(m map[string]string) []byte {
 	tempMap := make(map[string]interface{})

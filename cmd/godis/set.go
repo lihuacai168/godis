@@ -61,9 +61,14 @@ var SMembersCmd = &cobra.Command{
 }
 
 func SMembers(key string) []byte {
-	result, _ := rdb.SMembers(ctx, key).Result()
-	sl := make([]interface{}, len(result))
-	for i, s := range result {
+	var r []string
+	if workedClient == "cluster" {
+		r, _ = clusterClient.SMembers(ctx, key).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.SMembers(ctx, key).Result()
+	}
+	sl := make([]interface{}, len(r))
+	for i, s := range r {
 		m, err := JsonToMap(s)
 		if err != nil {
 			sl[i] = s
@@ -89,7 +94,7 @@ var SAddCmd = &cobra.Command{
 			}
 			members[index] = arg
 		}
-		SAdd(args[0], members)
+		SAdd(args[0], members[1:])
 		result := SMembers(args[0])
 		fmt.Println("sadd success, set key is "+args[0], ", value is ")
 		_, _ = colorableOut.Write(result)
@@ -98,5 +103,9 @@ var SAddCmd = &cobra.Command{
 }
 
 func SAdd(key string, members []interface{}) {
-	rdb.SAdd(ctx, key, members...)
+	if workedClient == "cluster" {
+		clusterClient.SAdd(ctx, key, members...)
+	} else if workedClient == "alone" {
+		aloneClient.SAdd(ctx, key, members...)
+	}
 }

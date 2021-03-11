@@ -83,7 +83,13 @@ var renamenxCmd = &cobra.Command{
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		//修改成功时，返回 1 。 如果 NEW_KEY_NAME 已经存在，返回 0 。
-		res, _ := rdb.RenameNX(ctx, args[0], args[1]).Result()
+		var res bool
+		if workedClient == "cluster" {
+			res, _ = clusterClient.RenameNX(ctx, args[0], args[1]).Result()
+		} else if workedClient == "alone" {
+			res, _ = aloneClient.RenameNX(ctx, args[0], args[1]).Result()
+		}
+
 		if res {
 			fmt.Println("rename success")
 		} else {
@@ -93,12 +99,22 @@ var renamenxCmd = &cobra.Command{
 }
 
 func typeKey(key string) string {
-	result, _ := rdb.Type(ctx, key).Result()
-	return result
+	var r string
+	if workedClient == "cluster" {
+		r, _ = clusterClient.Type(ctx, key).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.Type(ctx, key).Result()
+	}
+	return r
 }
 func isExists(key string) bool {
-	result, _ := rdb.Exists(ctx, key).Result()
-	return resultInt2Bool(result)
+	var r int64
+	if workedClient == "cluster" {
+		r, _ = clusterClient.Exists(ctx, key).Result()
+	} else if workedClient == "alone" {
+		r, _ = aloneClient.Exists(ctx, key).Result()
+	}
+	return resultInt2Bool(r)
 }
 
 func resultInt2Bool(resCode int64) bool {
@@ -109,7 +125,7 @@ func resultInt2Bool(resCode int64) bool {
 	}
 }
 func keys(pattern string) []string {
-	result, _ := rdb.Keys(ctx, pattern).Result()
+	result, _ := clusterClient.Keys(ctx, pattern).Result()
 	return result
 }
 func init() {
