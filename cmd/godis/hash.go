@@ -33,7 +33,7 @@ var (
 )
 
 func init() {
-	rootCmd.AddCommand(hashCmd)
+	//rootCmd.AddCommand(hashCmd)
 	hashCmd.AddCommand(hGetAllCmd)
 	rootCmd.AddCommand(hGetAllCmdShort)
 

@@ -30,7 +30,7 @@ var setCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(setCmd)
+	//rootCmd.AddCommand(setCmd)
 	rootCmd.AddCommand(SMembersCmdShort)
 	setCmd.AddCommand(SMembersCmd)
 
