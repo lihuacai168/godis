@@ -4,7 +4,7 @@
 - 支持常用`cluster`和`alone`模式的常用命令
 ```
 $ godis
-A brief description of your application
+A utility redis command line
 
 Usage:
   godis [command]
