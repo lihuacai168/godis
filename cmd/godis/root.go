@@ -45,7 +45,7 @@ var cfgFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "godis",
-	Short: "A brief description of your application",
+	Short: "A utility redis command line",
 
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		outWriter = cmd.OutOrStdout()
@@ -54,14 +54,17 @@ var rootCmd = &cobra.Command{
 		if outWriter != os.Stdout {
 			colorableOut = outWriter
 		}
-		parentCmd := cmd.Parent().Use
-		if parentCmd != "config" {
-			nameAndAliases := strings.Split(cmd.NameAndAliases(), ",")
-			safeCmd := []string{"hg", "hget", "hgetall", "hga", "sget", "smembers", "type", "config"}
-			if !contains(safeCmd, nameAndAliases[0]) {
-				panic(fmt.Sprintf("safe mode can only support cmds: %v", safeCmd))
+		if currentCluster.IsSafeMode {
+			parentCmd := cmd.Parent().Use
+			if parentCmd != "config" {
+				nameAndAliases := strings.Split(cmd.NameAndAliases(), ",")
+				safeCmd := []string{"hg", "hget", "hgetall", "hga", "sget", "smembers", "type", "config", "ttl"}
+				if !contains(safeCmd, nameAndAliases[0]) {
+					panic(fmt.Sprintf("safe mode can only support cmds: %v", safeCmd))
+				}
 			}
 		}
+
 	},
 }
 
@@ -150,7 +153,7 @@ func initClient() {
 		if cfg.ClusterOverride != "" {
 			panic(fmt.Sprintf("%s not in configuration", cfg.ClusterOverride))
 		} else {
-			panic(`not configured, please use "godis config add" to set a cluster configuration`)
+			log.Println(`not configured, please use "godis config add" to set a cluster configuration`)
 		}
 	} else {
 		a := currentCluster.Addrs
