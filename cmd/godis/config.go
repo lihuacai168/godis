@@ -55,11 +55,10 @@ func init() {
 }
 
 var configAddClusterCmd = &cobra.Command{
-	Use:     "add-cluster [NAME]",
-	Aliases: []string{"add"},
+	Use:     "add [NAME]",
 	Short:   "Add cluster",
 	Args:    cobra.ExactArgs(1),
-	Example: `godis config add-cluster qa_redis -a=192.168.22.64:7000 -p=redis_password --desc="redis for qa env"`,
+	Example: `godis config add-cluster qa_redis -a=192.168.22.64:7000 -p=redis_password --desc="redis for qa env"  --isSafeMode=false`,
 	Run: func(cmd *cobra.Command, args []string) {
 		name := args[0]
 		for _, cluster := range cfg.Clusters {
@@ -72,6 +71,7 @@ var configAddClusterCmd = &cobra.Command{
 			Addrs:       addrs,
 			Description: clusterDescription,
 			Password:    password,
+			IsSafeMode:  isSafeMode,
 		})
 		err := cfg.Write()
 		if err != nil {
@@ -81,9 +81,9 @@ var configAddClusterCmd = &cobra.Command{
 	},
 }
 var configRemoveClusterCmd = &cobra.Command{
-	Use:               "remove-cluster [NAME]",
-	Aliases:           []string{"rm", "delete", "del"},
-	Short:             "remove cluster",
+	Use:               "rm [NAME]",
+	Aliases:           []string{"delete", "del"},
+	Short:             "Remove cluster",
 	Args:              cobra.ExactArgs(1),
 	ValidArgsFunction: validConfigArgs,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -111,8 +111,7 @@ var configRemoveClusterCmd = &cobra.Command{
 	},
 }
 var configUseCmd = &cobra.Command{
-	Use:               "use-cluster [NAME]",
-	Aliases:           []string{"use"},
+	Use:               "use [NAME]",
 	Short:             "Sets the current cluster in the configuration",
 	Args:              cobra.ExactArgs(1),
 	ValidArgsFunction: validConfigArgs,
@@ -126,8 +125,8 @@ var configUseCmd = &cobra.Command{
 	},
 }
 var configLsCmd = &cobra.Command{
-	Use:     "get-clusters",
-	Aliases: []string{"ls", "list", "ll"},
+	Use:     "ls",
+	Aliases: []string{"list", "ll"},
 	Short:   "Display clusters in the configuration file",
 	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
