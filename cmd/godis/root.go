@@ -54,7 +54,7 @@ var rootCmd = &cobra.Command{
 		if outWriter != os.Stdout {
 			colorableOut = outWriter
 		}
-		if currentCluster.IsSafeMode {
+		if currentCluster != nil && currentCluster.IsSafeMode {
 			parentCmd := cmd.Parent().Use
 			if parentCmd != "config" {
 				nameAndAliases := strings.Split(cmd.NameAndAliases(), ",")
