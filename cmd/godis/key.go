@@ -76,6 +76,15 @@ var typeCmd = &cobra.Command{
 		fmt.Printf("%s type is: %s\n", args[0], res)
 	},
 }
+var ttlCmd = &cobra.Command{
+	Use:   "ttl [key]",
+	Short: "get key ttl",
+	Args:  cobra.ExactArgs(1),
+	Run: func(cmd *cobra.Command, args []string) {
+		res := ttlKey(args[0])
+		fmt.Println(res)
+	},
+}
 var renamenxCmd = &cobra.Command{
 	Use:     "renamenx [old_key] [new_key]",
 	Aliases: []string{"mv"},
@@ -107,6 +116,16 @@ func typeKey(key string) string {
 	}
 	return r
 }
+
+func ttlKey(key string) string {
+	var r string
+	if workedClient == "cluster" {
+		r = clusterClient.TTL(ctx, key).String()
+	} else if workedClient == "alone" {
+		r = aloneClient.TTL(ctx, key).String()
+	}
+	return r
+}
 func isExists(key string) bool {
 	var r int64
 	if workedClient == "cluster" {
@@ -133,6 +152,7 @@ func init() {
 	rootCmd.AddCommand(existsCmd)
 	rootCmd.AddCommand(typeCmd)
 	rootCmd.AddCommand(renamenxCmd)
+	rootCmd.AddCommand(ttlCmd)
 
 	// 返回结果不准确，暂时注释
 	//rootCmd.AddCommand(keysCmd)
