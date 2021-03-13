@@ -32,11 +32,12 @@ jobs:
           version: ${{ steps.get_version.outputs.TAG }}
           tag: ${{ steps.get_version.outputs.TAG }}
       - name: Publish Release
-        - uses: eregon/publish-release@v1
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            release_id: ${{ steps.create_release.outputs.id }}
+        id: publish_release
+        uses: eregon/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          release_id: ${{ steps.create_release.outputs.id }}
 
 #  build-and-release:
 #    needs: create-realese
@@ -52,7 +53,7 @@ jobs:
 #          upload_url: ${{ needs.create-realese.outputs.upload_url }}
 
   releases-matrix:
-    needs: create-realese
+    needs: publish_release
     name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
