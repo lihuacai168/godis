@@ -66,6 +66,13 @@ var rootCmd = &cobra.Command{
 		}
 
 	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if workedClient == "cluster" {
+			clusterClient.Close()
+		} else if workedClient == "alone" {
+			aloneClient.Close()
+		}
+	},
 }
 
 func contains(s []string, e string) bool {
