@@ -6,7 +6,7 @@ on:
 #    branches:
 #      - master
 
-name: Create Release And Upload assets
+name: Publish Release
 
 jobs:
   create-realese:
