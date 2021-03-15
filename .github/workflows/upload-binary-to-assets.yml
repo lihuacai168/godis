@@ -1,7 +1,8 @@
 on:
   release:
-    types: [created]
+    types: [published]
 
+name: Upload Binary to Assets
 jobs:
   releases-matrix:
     name: Release Go Binary
