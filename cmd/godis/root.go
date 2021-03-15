@@ -66,6 +66,13 @@ var rootCmd = &cobra.Command{
 		}
 
 	},
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		if workedClient == "cluster" {
+			clusterClient.Close()
+		} else if workedClient == "alone" {
+			aloneClient.Close()
+		}
+	},
 }
 
 func contains(s []string, e string) bool {
@@ -95,6 +102,7 @@ var (
 	addrs              []string
 	clusterOverride    string
 	isSafeMode         bool
+	db                 int
 )
 
 func init() {
@@ -108,6 +116,7 @@ func init() {
 	// when this action is called directly.
 	//rootCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 	rootCmd.PersistentFlags().StringVarP(&clusterOverride, "cluster", "c", "", "set a temporary current cluster")
+	rootCmd.PersistentFlags().IntVarP(&db, "db", "d", 0, "only work at alone mode")
 }
 
 // initConfig reads in config file and ENV variables if set.
@@ -163,7 +172,7 @@ func initClient() {
 			Password: p,
 		})
 		clusterSuccess, err := clusterClient.Ping(ctx).Result()
-		aloneClient = redis.NewClient(&redis.Options{Addr: a[0], Password: p})
+		aloneClient = redis.NewClient(&redis.Options{Addr: a[0], Password: p, DB: db})
 		aloneSuccess, _ := aloneClient.Ping(ctx).Result()
 		if clusterSuccess == ConnectSuccess {
 			workedClient = "cluster"

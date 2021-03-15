@@ -130,16 +130,43 @@ var hmsetCmd = &cobra.Command{
 		}
 		for k, v := range mapValue {
 			if workedClient == "cluster" {
-				clusterClient.HSet(ctx, args[0], k, v)
+				b, originalVal := marshalInterface(v)
+				if len(b) > 0 {
+					clusterClient.HSet(ctx, args[0], k, b)
+				} else {
+					clusterClient.HSet(ctx, args[0], k, originalVal)
+				}
 			} else if workedClient == "alone" {
-				aloneClient.HSet(ctx, args[0], k, v)
+				b, originalVal := marshalInterface(v)
+				if len(b) > 0 {
+					aloneClient.HSet(ctx, args[0], k, b)
+				} else {
+					aloneClient.HSet(ctx, args[0], k, originalVal)
+				}
 			}
 		}
 		newResult := hGetAll(args[0])
-		fmt.Println("hmset success, hash key is "+args[0], ", value is ")
+		if len(newResult) > 0 {
+			fmt.Println("hmset success, hash key is "+args[0], ", value is ")
+		} else {
+			fmt.Println("hmset failed")
+		}
 		_, _ = colorableOut.Write(map2Json(newResult))
 		fmt.Fprintln(outWriter)
 	},
+}
+
+func marshalInterface(v interface{}) ([]byte, interface{}) {
+	switch v.(type) {
+	case string, float64, float32, int, int16, int8, int32, int64:
+		return []byte{}, v
+	default:
+		b, err := json.Marshal(v)
+		if err != nil {
+			return []byte{}, v
+		}
+		return b, v
+	}
 }
 
 func delete(key string) int64 {
