@@ -2,6 +2,8 @@
 - 使用`golang`实现的`redis cli`,二进制文件直接运行，无需任何依赖
 - 支持安全模式，限制只能运行只读命令
 - 支持常用`cluster`和`alone`模式的常用命令
+- 带颜色的格式化输出，比原生的`redis cli`要更加友好和清晰
+  ![godis对比原生redis-cli](https://gitee.com/lihuacai/img/raw/master/blog/godis%E5%AF%B9%E6%AF%94%E5%8E%9F%E7%94%9Fredis-cli.png)
 
 # godis加入环境变量
 - 下载release中对应平台的压缩包
