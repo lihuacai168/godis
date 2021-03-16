@@ -24,7 +24,7 @@ import (
 var deleteCmd = &cobra.Command{
 	Use:     "del [key]",
 	Aliases: []string{"rm", "delete"},
-	Short:   "delete a key",
+	Short:   "Delete a key",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !isExists(args[0]) {
@@ -45,7 +45,7 @@ var deleteCmd = &cobra.Command{
 
 var existsCmd = &cobra.Command{
 	Use:   "exists [key]",
-	Short: "assure a key is exists",
+	Short: "Assure a key is exists",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		if isExists(args[0]) {
@@ -69,7 +69,7 @@ var keysCmd = &cobra.Command{
 
 var typeCmd = &cobra.Command{
 	Use:   "type [key]",
-	Short: "get key type",
+	Short: "Get key type",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		res := typeKey(args[0])
@@ -78,7 +78,7 @@ var typeCmd = &cobra.Command{
 }
 var ttlCmd = &cobra.Command{
 	Use:   "ttl [key]",
-	Short: "get key ttl",
+	Short: "Get key ttl",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		res := ttlKey(args[0])
@@ -88,7 +88,7 @@ var ttlCmd = &cobra.Command{
 var renamenxCmd = &cobra.Command{
 	Use:     "renamenx [old_key] [new_key]",
 	Aliases: []string{"mv"},
-	Short:   "rename key, if new_key is exist return fail, else success",
+	Short:   "Rename key, if new_key is exist return fail, else success",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		//修改成功时，返回 1 。 如果 NEW_KEY_NAME 已经存在，返回 0 。

@@ -58,7 +58,7 @@ var hGetAllCmdShort = hGetAllCmd
 var hGetAllCmd = &cobra.Command{
 	Use:     "hgetall [key]",
 	Aliases: []string{"hga"},
-	Short:   "hash key hgetall",
+	Short:   "Hash key hgetall",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		result := hGetAll(args[0])
@@ -70,7 +70,7 @@ var hGetCmdShort = hGetCmd
 var hGetCmd = &cobra.Command{
 	Use:     "hget [key] [field]",
 	Aliases: []string{"hg"},
-	Short:   "hash key hget",
+	Short:   "Hash key hget",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		result := hGet(args[0], args[1])
@@ -83,7 +83,7 @@ var hDelCmdShort = hDelCmd
 var hDelCmd = &cobra.Command{
 	Use:     "hdel [key] [field]",
 	Aliases: []string{"hd"},
-	Short:   "hash key hget",
+	Short:   "Hash key hdel",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		if !isExists(args[0]) {
@@ -98,7 +98,7 @@ var hashCopyCmdShort = hashCopyCmd
 var hashCopyCmd = &cobra.Command{
 	Use:     "hcopy [old_key] [new_key]",
 	Aliases: []string{"hcp"},
-	Short:   "copy a hash key",
+	Short:   "Copy a hash key",
 	Args:    cobra.ExactArgs(2),
 	Run: func(cmd *cobra.Command, args []string) {
 		result := hGetAll(args[0])
@@ -120,7 +120,7 @@ var hmsetCmdShort = hmsetCmd
 var hmsetCmd = &cobra.Command{
 	Use:     "hmset [key] [jsonValue]",
 	Aliases: []string{"hms"},
-	Short:   "add a hash key, auto unpack jsonValue",
+	Short:   "Add a hash key, auto unpack jsonValue",
 	Args:    cobra.ExactArgs(2),
 	Example: `godis hash hmset test_key '{"a":1, "b": "b"}'`,
 	Run: func(cmd *cobra.Command, args []string) {
