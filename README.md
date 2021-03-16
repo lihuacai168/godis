@@ -1,7 +1,15 @@
-# godis
+# 什么是godis
 - 使用`golang`实现的`redis cli`,二进制文件直接运行，无需任何依赖
 - 支持安全模式，限制只能运行只读命令
 - 支持常用`cluster`和`alone`模式的常用命令
+
+# godis加入环境变量
+- 下载release中对应平台的压缩包
+- 解压，得到godis可执行文件
+- 把`godis`可执行文件移动到`/usr/local/bin/`目录中（适用于Mac和Linux）
+- `Windows`需要把`godis`所在的路径加入到系统的环境变量中
+
+配置好之后，在命令行终端输入`godis`就能直接使用啦~
 ```
 $ godis
 A utility redis command line
@@ -11,19 +19,19 @@ Usage:
 
 Available Commands:
   config      Handle godis configuration
-  del         delete a key
-  exists      assure a key is exists
-  hcopy       copy a hash key
-  hdel        hash key hget
+  del         Delete a key
+  exists      Assure a key is exists
+  hcopy       Copy a hash key
+  hdel        Hash key hdel
   help        Help about any command
-  hget        hash key hget
-  hgetall     hash key hgetall
-  hmset       add a hash key, auto unpack jsonValue
-  renamenx    rename key, if new_key is exist return fail, else success
-  sadd        add a set key
-  smembers    get set key values
-  ttl         get key ttl
-  type        get key type
+  hget        Hash key hget
+  hgetall     Hash key hgetall
+  hmset       Add a hash key, auto unpack jsonValue
+  renamenx    Rename key, if new_key is exist return fail, else success
+  sadd        Add a set key
+  smembers    Get set key values
+  ttl         Get key ttl
+  type        Get key type
 ```
 
 

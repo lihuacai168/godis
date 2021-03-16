@@ -51,7 +51,7 @@ var SMembersCmdShort = SMembersCmd
 var SMembersCmd = &cobra.Command{
 	Use:     "smembers [key]",
 	Aliases: []string{"sget"},
-	Short:   "get set key values",
+	Short:   "Get set key values",
 	Args:    cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		result := SMembers(args[0])
@@ -84,7 +84,7 @@ func SMembers(key string) []byte {
 var SAddCmdShort = SAddCmd
 var SAddCmd = &cobra.Command{
 	Use:   "sadd [key] member1 member2 member3...",
-	Short: "add a set key",
+	Short: "Add a set key",
 	Args:  cobra.RangeArgs(2, int(^uint(0)>>1)),
 	Run: func(cmd *cobra.Command, args []string) {
 		members := make([]interface{}, len(args))
